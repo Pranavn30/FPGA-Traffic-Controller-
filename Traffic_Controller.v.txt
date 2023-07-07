@@ -1,0 +1,82 @@
+module Traffic_Controller(Reset, Clock, E, NL, EL, W, ETL, NLTL, ELTL, WTL, timer);
+input E,NL,W,EL,Clock,Reset;
+output[3,0] ETL, NLTL, ELTL, WTL, timer;
+
+parameter s1 = 4'b0000
+parameter s2 = 4'b0001
+parameter s3 = 4'b0010
+
+parameter s4 = 4'b0011
+parameter s5 = 4'b0100
+parameter s6 = 4'b0101
+parameter s7 = 4'b0110
+parameter s8 = 4'b0111
+parameter s9 = 4'b1111
+
+A = (~E&~W&~NL&~EL&(counter>10)) | (~E&~W&~NL&~EL&(counter>3))
+B = (E&W&NL&EL&(counter>3)) | (((E&~W&~&~NL&~EL)|(
+
+always@* begin
+case (S)
+	S0: begin
+	if (UD & EN)
+		NS = S1;
+	else if(UD & ~EN)
+		NS = S0;
+else if(~UD & EN)
+NS = S0;
+else
+NS = S0;
+end
+S1: begin
+if (UD & EN)
+NS = S2;
+else if(UD & ~EN)
+NS = S1;
+else if(~UD & EN)
+NS = S0;
+else
+NS = S1;
+end
+S2: begin
+if (UD & EN)
+NS = S3;
+else if(UD & ~EN)
+NS = S2;
+else if(~UD & EN)
+NS = S1;
+else
+NS = S2;
+end
+S3: begin
+if (UD & EN)
+NS = S3;
+else if(UD & ~EN)
+NS = S3;
+else if(~UD & EN)
+NS = S2;
+else
+NS = S3;
+end
+default: NS = S0;
+endcase
+end
+
+reg [COUNT_WIDTH-1:0] count;
+
+always @(posedge Clock or posedge reset) begin
+    if (reset) begin
+        count <= 0;
+        timer_done <= 0;
+    end
+    else begin
+        if (count == COUNT_WIDTH-1) begin
+            count <= 0;
+            timer_done <= 1;
+        end
+        else begin
+            count <= count + 1;
+            timer_done <= 0;
+        end
+    end
+end
